@@ -1,4 +1,4 @@
-
+<?php include('../config.php'); ?>
 <html>
   <head>
     <title>Dashboard</title>
@@ -6,6 +6,14 @@
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
+    
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" 
+      href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
 	  <link rel="icon" href="assets/logo.png">
     <style>
       @import url(https://unpkg.com/@webpixels/css@1.1.5/dist/index.css);
@@ -17,6 +25,23 @@
     			background-color: aliceblue;
 			}
 	  </style>
+    <script>
+$(document).ready(function() {
+    $('#voter').DataTable();
+});
+$(document).ready(function() {
+    $('#position').DataTable();
+});
+$(document).ready(function() {
+    $('#candidate').DataTable();
+});
+$(document).ready(function() {
+    $('#ballot_position').DataTable();
+});
+$(document).ready(function() {
+    $('#title_e').DataTable();
+});
+</script>
   </head>
 
   <body>
@@ -67,7 +92,7 @@
                 <div class="avatar-parent-child">
                   <img
                     alt="Image Placeholder"
-                    src="assets/logo.png"
+                    src="assets/tiranga.png"
                     class="avatar avatar- rounded-circle"
                   />
                   <span class="avatar-child avatar-badge bg-success"></span>
@@ -82,7 +107,7 @@
                 <a href="#" class="dropdown-item">Settings</a>
                 <a href="#" class="dropdown-item">Billing</a>
                 <hr class="dropdown-divider" />
-                <a href="#" class="dropdown-item">Logout</a>
+                <a href="http://localhost/Vote_system/" class="dropdown-item">Logout</a>
               </div>
             </div>
           </div>
@@ -131,7 +156,7 @@
 </li>
 
   <li class="nav-item">
-    <a class="nav-link d-flex align-items-center" href="login.php">
+    <a class="nav-link d-flex align-items-center" href="http://localhost/Vote_system/">
       <i class="bi bi-box-arrow-right"></i>
       <p class="ms-2 mb-0">Logout</p>
     </a>
@@ -168,7 +193,7 @@
                       <span>Profile</span>
                     </a>
                     <a
-                      href="#"
+                      href="http://localhost/Vote_system/"
                       class="btn d-inline-flex btn-sm btn-primary mx-1"
                     >
                       <span class="pe-2">
@@ -186,15 +211,30 @@
 
 <main class="py-6 bg-surface-secondary">
   <div class="container-fluid">
-    
+    <?php 
+      $sql_positions = "SELECT COUNT(*) AS total_positions FROM positions";
+      $result_positions = $conn->query($sql_positions);
+      $positions = $result_positions->fetch_assoc()['total_positions'];
+      
+      $sql_candidate = "SELECT COUNT(*) AS total_candidate FROM candidates";
+      $result_candidate = $conn->query($sql_candidate);
+      $candidate = $result_candidate->fetch_assoc()['total_candidate'];
+
+       $sql_voter = "SELECT COUNT(*) AS total_voter FROM election_voters";
+      $result_voter = $conn->query($sql_voter);
+      $voter = $result_voter->fetch_assoc()['total_voter'];
+      
+      $sql_votes = "SELECT COUNT(*) AS total_votes FROM votes";
+      $result_votes = $conn->query($sql_votes);
+      $votes = $result_votes->fetch_assoc()['total_votes'];?>
     <!-- Dashboard Widgets -->
     <div class="row mb-4">
       <!-- # of Positions -->
       <div class="col-xl-3 col-sm-6 mb-3">
         <div class="card shadow border-0 text-white bg-primary">
           <div class="card-body">
-            <h5># of Positions</h5>
-            <h2>1</h2>
+            <h5>Positions</h5>
+            <h2><?php echo $positions; ?></h2>
           </div>
         </div>
       </div>
@@ -202,8 +242,8 @@
       <div class="col-xl-3 col-sm-6 mb-3">
         <div class="card shadow border-0 text-white bg-success">
           <div class="card-body">
-            <h5># of Candidates</h5>
-            <h2>2</h2>
+            <h5>Candidates</h5>
+            <h2><?php echo $candidate;?></h2>
           </div>
         </div>
       </div>
@@ -212,7 +252,7 @@
         <div class="card shadow border-0 text-white bg-warning">
           <div class="card-body">
             <h5>Total Voters</h5>
-            <h2>14</h2>
+             <h2><?php echo $voter;?></h2>
           </div>
         </div>
       </div>
@@ -221,7 +261,7 @@
         <div class="card shadow border-0 text-white bg-danger">
           <div class="card-body">
             <h5>Voters Voted</h5>
-            <h2>13</h2>
+            <h2><?php echo $votes;?></h2>
           </div>
         </div>
       </div>
@@ -235,9 +275,10 @@
       <div class="card-body">
         <canvas id="votesChart"></canvas>
       </div>
-    </div>
+     </div>
   </div>
 </main>
+
 <section id="voters" class="py-6 bg-surface-secondary">
   <div class="container-fluid">
     <div class="card shadow border-0 mb-7">
@@ -297,7 +338,8 @@
       </div>
       <div class="card-body">
         <div class="table-responsive">
-          <table class="table table-hover table-bordered align-middle">
+          <table class="table table-hover table-bordered align-middle" id="voter" class="display">
+     
             <thead class="table-dark">
               <tr>
                 <th>#</th>
@@ -307,28 +349,36 @@
                 <th>Actions</th>
               </tr>
             </thead>
-            <tbody>
-              <!-- Example static data (replace with PHP loop later) -->
-              <tr>
-                <td>1</td>
-                <td>John Doe</td>
-                <td>john@example.com</td>
-                <td><span class="badge bg-success">Voted</span></td>
-                <td>
-                  <a href="edit_voter.php?id=1" class="btn btn-sm btn-warning"><i class="bi bi-pencil-square"></i></a>
-                  <a href="delete_voter.php?id=1" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
-                </td>
-              </tr>
-              <tr>
-                <td>2</td>
-                <td>Jane Smith</td>
-                <td>jane@example.com</td>
-                <td><span class="badge bg-secondary">Not Voted</span></td>
-                <td>
-                  <a href="edit_voter.php?id=2" class="btn btn-sm btn-warning"><i class="bi bi-pencil-square"></i></a>
-                  <a href="delete_voter.php?id=2" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
-                </td>
-              </tr>
+             <?php
+
+                $sql = "SELECT id, full_name, email  FROM users where role='voter'";
+                $result = $conn->query($sql);
+
+                if ($result->num_rows > 0) {
+                  $i=0;
+                  while($row = $result->fetch_assoc()) {
+                    $i++;
+                    echo "<tr>";
+                    echo "<td>$i</td>";
+                    echo "<td>".$row['full_name']."</td>";
+                    echo "<td>".$row['email']."</td>";
+                    echo "<td></td>";
+                    echo "<td>
+                            <a href='edit_position.php?id=".$row['id']."' class='btn btn-sm btn-warning'>
+                              <i class='bi bi-pencil-square'></i>
+                            </a>
+                            <a href='delete_position.php?id=".$row['id']."' class='btn btn-sm btn-danger' onclick=\"return confirm('Are you sure you want to delete this position?');\">
+                              <i class='bi bi-trash'></i>
+                            </a>
+                          </td>";
+                    echo "</tr>";
+                  }
+                } else {
+                  echo "<tr><td colspan='5' class='text-center'>No positions found</td></tr>";
+                }
+
+               
+              ?>
             </tbody>
           </table>
         </div>
@@ -342,29 +392,98 @@
     <div class="card shadow border-0 mb-7">
       <div class="card-header d-flex justify-content-between align-items-center">
         <h4 class="mb-0">Positions</h4>
-        <a href="add_position.php" class="btn btn-sm btn-primary">
-          <i class="bi bi-plus-circle"></i> Add Position
-        </a>
+       <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addposition">
+  <i class="bi bi-plus-circle"></i>  Add New Positions
+</button>
+<div class="modal fade" id="addposition" tabindex="-1" aria-labelledby="addposition" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="save_voter.php" method="POST" enctype="multipart/form-data">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addposition">Add New Positions</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="firstname" class="form-label">Firstname</label>
+            <input type="text" class="form-control" name="firstname" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="lastname" class="form-label">Lastname</label>
+            <input type="text" class="form-control" name="lastname" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" name="password" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="mobile" class="form-label">Mobile Number</label>
+            <input type="text" class="form-control" name="mobile" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="photo" class="form-label">Photo</label>
+            <input type="file" class="form-control" name="photo" accept="image/*">
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
       </div>
+
       <div class="card-body">
         <div class="table-responsive">
-          <table class="table table-hover table-bordered align-middle">
+          <table class="table table-hover table-bordered align-middle"id="position" class="display">
             <thead class="table-dark">
               <tr>
-                <th>#</th>
+                 <th>#</th>
+                <th>Election ID</th>
                 <th>Position Name</th>
+                <th>Seats</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>1</td>
-                <td>President</td>
-                <td>
-                  <a href="#" class="btn btn-sm btn-warning"><i class="bi bi-pencil-square"></i></a>
-                  <a href="#" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
-                </td>
-              </tr>
+              <?php
+
+                $sql = "SELECT id, election_id, name, seats FROM positions";
+                $result = $conn->query($sql);
+
+                if ($result->num_rows > 0) {
+                  $i=0;
+                  while($row = $result->fetch_assoc()) {
+                    $i++;
+                    echo "<tr>";
+                    echo "<td>$i</td>";
+                    echo "<td>".$row['election_id']."</td>";
+                    echo "<td>".$row['name']."</td>";
+                    echo "<td>".$row['seats']."</td>";
+                    echo "<td>
+                            <a href='edit_position.php?id=".$row['id']."' class='btn btn-sm btn-warning'>
+                              <i class='bi bi-pencil-square'></i>
+                            </a>
+                            <a href='delete_position.php?id=".$row['id']."' class='btn btn-sm btn-danger' onclick=\"return confirm('Are you sure you want to delete this position?');\">
+                              <i class='bi bi-trash'></i>
+                            </a>
+                          </td>";
+                    echo "</tr>";
+                  }
+                } else {
+                  echo "<tr><td colspan='5' class='text-center'>No positions found</td></tr>";
+                }
+
+               
+              ?>
             </tbody>
           </table>
         </div>
@@ -373,37 +492,106 @@
   </div>
 </section>
 
+
 <!-- Candidates Section -->
 <section id="candidates" class="py-6 bg-surface-secondary">
   <div class="container-fluid">
     <div class="card shadow border-0 mb-7">
       <div class="card-header d-flex justify-content-between align-items-center">
         <h4 class="mb-0">Candidates</h4>
-        <a href="add_candidate.php" class="btn btn-sm btn-primary">
-          <i class="bi bi-person-plus-fill"></i> Add Candidate
-        </a>
+        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addCandidate">
+  <i class="bi bi-person-plus-fill"></i>  Candidate
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="addCandidate" tabindex="-1" aria-labelledby="addCandidate" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="save_voter.php" method="POST" enctype="multipart/form-data">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addCandidate">Add New Candidate</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="firstname" class="form-label">Firstname</label>
+            <input type="text" class="form-control" name="firstname" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="lastname" class="form-label">Lastname</label>
+            <input type="text" class="form-control" name="lastname" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" name="password" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="mobile" class="form-label">Mobile Number</label>
+            <input type="text" class="form-control" name="mobile" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="photo" class="form-label">Photo</label>
+            <input type="file" class="form-control" name="photo" accept="image/*">
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
       </div>
       <div class="card-body">
         <div class="table-responsive">
-          <table class="table table-hover table-bordered align-middle">
+          <table class="table table-hover table-bordered align-middle"  id="candidate" class="display">
             <thead class="table-dark">
               <tr>
                 <th>#</th>
                 <th>Name</th>
                 <th>Position</th>
+                <th>Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>1</td>
-                <td>Admin</td>
-                <td>President</td>
-                <td>
-                  <a href="#" class="btn btn-sm btn-warning"><i class="bi bi-pencil-square"></i></a>
-                  <a href="#" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
-                </td>
-              </tr>
+              <?php
+
+                $sql = "SELECT p.id, p.name, c.full_name FROM positions p RIGHT JOIN candidates c ON p.id = c.position_id;";
+                $result = $conn->query($sql);
+$i=0;
+                if ($result->num_rows > 0) {
+                  while($row = $result->fetch_assoc()) {
+                    $i++;
+                    echo "<tr>";
+                    echo "<td>$i</td>";
+                    echo "<td>".$row['full_name']."</td>";
+                    echo "<td>".$row['name']."</td>";
+                    echo "<td></td>";
+                    echo "<td>
+                            <a href='edit_position.php?id=".$row['id']."' class='btn btn-sm btn-warning'>
+                              <i class='bi bi-pencil-square'></i>
+                            </a>
+                            <a href='delete_position.php?id=".$row['id']."' class='btn btn-sm btn-danger' onclick=\"return confirm('Are you sure you want to delete this position?');\">
+                              <i class='bi bi-trash'></i>
+                            </a>
+                          </td>";
+                    echo "</tr>";
+                  }
+                } else {
+                  echo "<tr><td colspan='5' class='text-center'>No positions found</td></tr>";
+                }
+
+               $conn->close();
+              ?>
             </tbody>
           </table>
         </div>
@@ -418,30 +606,104 @@
     <div class="card shadow border-0 mb-7">
       <div class="card-header d-flex justify-content-between align-items-center">
         <h4 class="mb-0">Ballot Position</h4>
-        <a href="add_ballot.php" class="btn btn-sm btn-primary">
-          <i class="bi bi-ui-checks"></i> Add Ballot
-        </a>
+        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addBallot">
+  <i class="bi bi-ui-circle"></i>  Add New Ballot
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="addBallot" tabindex="-1" aria-labelledby="addBallot" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="save_voter.php" method="POST" enctype="multipart/form-data">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addBallot">Add New Ballot Position</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="firstname" class="form-label">Firstname</label>
+            <input type="text" class="form-control" name="firstname" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="lastname" class="form-label">Lastname</label>
+            <input type="text" class="form-control" name="lastname" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" name="password" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="mobile" class="form-label">Mobile Number</label>
+            <input type="text" class="form-control" name="mobile" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="photo" class="form-label">Photo</label>
+            <input type="file" class="form-control" name="photo" accept="image/*">
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
       </div>
       <div class="card-body">
         <p class="text-muted">Ballot positions decide the order of candidates in the election ballot.</p>
         <!-- Example table -->
-        <table class="table table-hover table-bordered align-middle">
-          <thead class="table-dark">
-            <tr>
-              <th>#</th>
-              <th>Position</th>
-              <th>Candidate</th>
-              <th>Order</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>1</td>
-              <td>President</td>
-              <td>Admin</td>
-              <td>1</td>
-            </tr>
-          </tbody>
+        <table class="table table-hover table-bordered align-middle" id="ballot_position" class="display">
+            <thead class="table-dark">
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <?php
+                  include('../config.php');
+                $sql = "SELECT users.id ,users.full_name,ballots.status,users.email FROM users
+INNER JOIN ballots 
+    ON ballots.user_id = users.id
+WHERE users.role = 'voter';";
+                $result = $conn->query($sql);
+
+                if ($result->num_rows > 0) {
+                  $i=0;
+                  while($row = $result->fetch_assoc()) {
+                    $i++;
+                    echo "<tr>";
+                    echo "<td>$i</td>";
+                    echo "<td>".$row['full_name']."</td>";
+                    echo "<td>".$row['email']."</td>";
+                    echo "<td>".$row['status']."</td>";
+                    echo "<td>
+                            <a href='edit_position.php?id=".$row['id']."' class='btn btn-sm btn-warning'>
+                              <i class='bi bi-pencil-square'></i>
+                            </a>
+                            <a href='delete_position.php?id=".$row['id']."' class='btn btn-sm btn-danger' onclick=\"return confirm('Are you sure you want to delete this position?');\">
+                              <i class='bi bi-trash'></i>
+                            </a>
+                          </td>";
+                    echo "</tr>";
+                  }
+                } else {
+                  echo "<tr><td colspan='5' class='text-center'>No positions found</td></tr>";
+                }
+
+               
+              ?>
+            </tbody>
+         
         </table>
       </div>
     </div>
@@ -449,25 +711,106 @@
 </section>
 
 <!-- Election Title Section -->
+
 <section id="election-title" class="py-6 bg-surface-secondary">
   <div class="container-fluid">
     <div class="card shadow border-0 mb-7">
       <div class="card-header d-flex justify-content-between align-items-center">
         <h4 class="mb-0">Election Title</h4>
-        <a href="add_election.php" class="btn btn-sm btn-primary">
-          <i class="bi bi-flag-fill"></i> Add Election
-        </a>
+        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addElection">
+  <i class="bi bi-plus-flag"></i>  Add New Voter
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="addElection" tabindex="-1" aria-labelledby="addElection" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="save_voter.php" method="POST" enctype="multipart/form-data">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addElection">Add New Election</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="firstname" class="form-label">Firstname</label>
+            <input type="text" class="form-control" name="firstname" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="lastname" class="form-label">Lastname</label>
+            <input type="text" class="form-control" name="lastname" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" name="password" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="mobile" class="form-label">Mobile Number</label>
+            <input type="text" class="form-control" name="mobile" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="photo" class="form-label">Photo</label>
+            <input type="file" class="form-control" name="photo" accept="image/*">
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
       </div>
       <div class="card-body">
-        <ul class="list-group">
-          <li class="list-group-item d-flex justify-content-between align-items-center">
-            College Student Election 2025
-            <span>
-              <a href="#" class="btn btn-sm btn-warning"><i class="bi bi-pencil-square"></i></a>
-              <a href="#" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
-            </span>
-          </li>
-        </ul>
+        <div class="table-responsive">
+          <table class="table table-hover table-bordered align-middle"id="title_e" class="display">
+            <thead class="table-dark">
+              <tr>
+                <th>id</th>
+                <th>title</th>
+                <th>description</th>
+                <th>status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php
+               include('../config.php');
+                $sql = "SELECT id, title, description, status FROM elections";
+                $result1 = $conn->query($sql);
+
+                if ($result1->num_rows > 0) {
+                  while($row = $result1->fetch_assoc()) {
+                    echo "<tr>";
+                    echo "<td>".$row['id']."</td>";
+                    echo "<td>".$row['title']."</td>";
+                    echo "<td>".$row['description']."</td>";
+                    echo "<td>".$row['status']."</td>";
+                    echo "<td>
+                            <a href='edit_position.php?id=".$row['id']."' class='btn btn-sm btn-warning'>
+                              <i class='bi bi-pencil-square'></i>
+                            </a>
+                            <a href='delete_position.php?id=".$row['id']."' class='btn btn-sm btn-danger' onclick=\"return confirm('Are you sure you want to delete this position?');\">
+                              <i class='bi bi-trash'></i>
+                            </a>
+                          </td>";
+                    echo "</tr>";
+                  }
+                } else {
+                  echo "<tr><td colspan='5' class='text-center'>No positions found</td></tr>";
+                }
+
+                $conn->close();
+              ?>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -475,16 +818,16 @@
 
 
 <!-- Chart.js Script -->
-<!-- <script>
+<script>
   const ctx = document.getElementById('votesChart').getContext('2d');
   new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: ['Admin', 'Candidate B'],
+      labels: ['Candidate ','position','Voter'],
       datasets: [{
-        label: 'Votes',
-        data: [8, 5],  // Example votes count
-        backgroundColor: ['#007bff', '#28a745']
+         label: 'Candidate ',
+        data: [ <?php echo $positions;?>,<?php echo $candidate;?>,<?php echo $voter;?>], 
+        backgroundColor: [ '#ff391aff','#4ad4d2ff','#7efd91ff']
       }]
     },
     options: {
@@ -494,7 +837,7 @@
       }
     }
   });
-</script> -->
+</script>
 
       </div>
     </div>

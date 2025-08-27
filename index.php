@@ -1,3 +1,41 @@
+<?php
+session_start();
+include("conn.php");  
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $email = $_POST['uname'];
+    $password = $_POST['pswd'];
+
+     $sql = "SELECT id, full_name, email, password, role FROM users WHERE email='$email' LIMIT 1";
+    $result = mysqli_query($conn, $sql);
+
+    if (mysqli_num_rows($result) == 1) {
+        $row = mysqli_fetch_assoc($result);
+
+        $_SESSION['user_id'] = $row['id'];
+        $_SESSION['full_name'] = $row['full_name'];
+        $_SESSION['role'] = $row['role'];
+        if ($row['role'] == "admin") {
+            header("Location: Includes/Admin/index.php");
+        }
+        elseif($row['role'] == "voter"){
+        header("Location: Includes/user/index.php");
+        }
+       else {
+            header("Location: voter_home.php"); 
+        }
+        //  if () {
+          
+        // } else {
+        //     header("Location: voter_home.php"); 
+        // }
+        exit();
+    } else {
+        echo "Invalid username or password!";
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -43,7 +81,7 @@
 <div class="modal fade" id="addVoterModal" tabindex="-1" aria-labelledby="addVoterModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form action="save_voter.php" method="POST" enctype="multipart/form-data">
+      <form action="" method="POST" enctype="multipart/form-data">
         <div class="modal-header">
           <h5 class="modal-title" id="addVoterModalLabel">Add New Voter</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -51,13 +89,13 @@
         
         <div class="modal-body">
           <div class="mb-3">
-            <label for="firstname" class="form-label">Firstname</label>
+            <label for="firstname" class="form-label">Full Name</label>
             <input type="text" class="form-control" name="firstname" required>
           </div>
 
           <div class="mb-3">
-            <label for="lastname" class="form-label">Lastname</label>
-            <input type="text" class="form-control" name="lastname" required>
+            <label for="email" class="form-label">Email</label>
+            <input type="text" class="form-control" name="email" required>
           </div>
 
           <div class="mb-3">
@@ -69,6 +107,15 @@
             <label for="mobile" class="form-label">Mobile Number</label>
             <input type="text" class="form-control" name="mobile" required>
           </div>
+          <div class="mb-3">
+  <label for="role" class="form-label">Role</label>
+  <select class="form-control" name="role" id="role" required>
+    <option value="">-- Select Role --</option>
+    <option value="admin">Admin</option>
+    <option value="voter">Voter</option>
+  </select>
+</div>
+
 
           <div class="mb-3">
             <label for="photo" class="form-label">Photo</label>
@@ -87,7 +134,7 @@
                 <button type="button" class="btn btn-outline-success text-dark">Admin Login</button>
              
               </div>
-          <form action="#" class="was-validated">
+          <form action="#" class="was-validated" method="post">
            
             <h4 class="text-center mb-4">Login for Voting</h4>
            
@@ -123,3 +170,37 @@
   
 </body>
 </html>
+<!--?php
+include("conn.php");
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $fullname = $_POST['firstname'];
+    $email    = $_POST['email'];
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT); 
+    $mobile   = $_POST['mobile'];
+    $role     = $_POST['role'];
+
+    $photo = "";
+    if (!empty($_FILES["photo"]["name"])) {
+        $targetDir = "Includes/Admin/uploads/";  
+        $photo = time() . "_" . basename($_FILES["photo"]["name"]);
+        $targetFilePath = $targetDir . $photo;
+
+        // Upload file
+        if (!move_uploaded_file($_FILES["photo"]["tmp_name"], $targetFilePath)) {
+            echo "<div class='alert alert-danger'>Error uploading photo.</div>";
+            $photo = ""; 
+        }
+    }
+
+    // Insert into DB
+    $sql = "INSERT INTO users (full_name, email, password, mobile, role, img) 
+            VALUES ('$fullname', '$email', '$password', '$mobile', '$role', '$photo')";
+
+    if ($conn->query($sql) === TRUE) {
+        echo "<div class='alert alert-success'>New voter added successfully!</div>";
+    } else {
+        echo "<div class='alert alert-danger'>Error: " . $conn->error . "</div>";
+    }
+}
+?-->
